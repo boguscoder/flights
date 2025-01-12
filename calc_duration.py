@@ -14,7 +14,9 @@ def localize(datetime_str, timezone_str):
 with open(sys.argv[1], newline='') as flights, open(sys.argv[2], 'w', newline='') as outfile:
     reader = csv.DictReader(flights)
     fieldnames = reader.fieldnames + ["Duration"]
-    writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    fieldnames.remove("TZ To")
+    fieldnames.remove("TZ From")
+    writer = csv.DictWriter(outfile, fieldnames=fieldnames, extrasaction="ignore")
     
     writer.writeheader()
 
