@@ -1,39 +1,21 @@
 # flights
-Steps for converting flightly exports into https://my.flightradar24.com/ format
+Steps for converting [flightly](https://flighty.com/) exports into https://my.flightradar24.com/ format
 
-Using sqlite for the whole shebang 
+Using sqlite for the ~~whole shebang~~ first step 
+
+> NOTE: Flightradar24 import doesn't calculate flight time automatically so we use tzones.cvs that maps IATA airport codes to IANA timezone names (sourced from [here](https://raw.githubusercontent.com/hroptatyr/dateutils/tzmaps/iata.tzmap)), alas sqlite3 can't properly deal with names either so we use smol python script to patch the duration ¯\\_(ツ)_/¯ 
 
 1. Export your data from flightly app into .csv
-2. Open exported file in sqlite: `sqlite3 :memory: -cmd '.mode csv' -cmd '.import <your_export>.csv flightly' -cmd '.mode column' `
-3. Set it to write to .csv too:
+2. Preprocess it with sqlite
 ```bash
-sqlite> .mode csv
-sqlite> .output flightradar24.csv
-sqlite> <query here>
+sqlite3 -cmd '.mode csv' -cmd '.import <your_export>.csv flightly' -cmd '.import tzones.csv tzones' -cmd '.output flightradar24.csv' -cmd '.headers on' < query.sql
 ```
 
-where query is
+> NOTE: If you dont care about flight durations, you can skip step 3
 
-```sql
-select 
-  Date, Flight as "Flight number", 
-  "From", "To", 
-  coalesce(
-    NULLIF("Take off (Actual)", ""),
-    NULLIF("Take off (Scheduled)", ""),
-    NULLIF("Gate Departure (Actual)", ""),
-    NULLIF("Gate Departure (Scheduled)", "")
-  ) as "Dep time",
-  coalesce(
-    NULLIF("Landing (Actual)" , ""),
-    NULLIF("Landing (Scheduled)", ""),
-    NULLIF("Gate Arrival (Actual)", ""),
-    NULLIF("Gate Arrival (Scheduled)" , "")
-  ) as "Arr time",
-  Airline,
-  "Aircraft Type Name" as Aircraft,
-  "Tail Number" as Registration
-  from flightly;
-```
+3. feed result into calc_duration.py <in> <out>
+4. upload to https://my.flightradar24.com/
+5. ???
+6. PROFIT!
 
-TODO: Flightradar24 doesn't do flight time math for you :( but it should be trivial to [get timezone by iata code](https://raw.githubusercontent.com/hroptatyr/dateutils/tzmaps/iata.tzmap) and subtract right in the sql query
+> TODO: get rid of sqlite, rewrite everything into python since we need it anyway
