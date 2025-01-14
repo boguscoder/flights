@@ -8,9 +8,9 @@ select
         NULLIF("Gate Departure (Scheduled)", "")
     ) as "Dep time",
     coalesce(
-        NULLIF("Gate Arrival (Actual)", ""),
         NULLIF("Landing (Actual)" , ""),
         NULLIF("Landing (Scheduled)", ""),
+        NULLIF("Gate Arrival (Actual)", ""),
         NULLIF("Gate Arrival (Scheduled)" , "")
     ) as "Arr time",
     Airline,
