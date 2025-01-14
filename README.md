@@ -3,12 +3,12 @@ Steps for converting [flightly](https://flighty.com/) exports into https://my.fl
 
 Using sqlite for the ~~whole shebang~~ first step 
 
-> NOTE: Flightradar24 import doesn't calculate flight time automatically so we use tzones.cvs that maps IATA airport codes to IANA timezone names (sourced from [here](https://raw.githubusercontent.com/hroptatyr/dateutils/tzmaps/iata.tzmap)), alas sqlite3 can't properly deal with names either so we use smol python script to patch the duration ¯\\_(ツ)_/¯ 
+> NOTE: Flightradar24 import doesn't calculate flight time automatically so we use tzones.cvs that maps IATA airport codes to IANA timezone names (sourced from [here](https://raw.githubusercontent.com/hroptatyr/dateutils/tzmaps/iata.tzmap)), alas sqlite3 can't properly deal with names either so we use smol python script to patch the duration ¯\\_(ツ)_/¯ . Map of airline ICAO codes to names is sourced from [here](https://raw.githubusercontent.com/benct/iata-utils/refs/heads/master/generated/iata_airlines.csv) and manually patched
 
 1. Export your data from flightly app into .csv
 2. Preprocess it with sqlite
 ```bash
-sqlite3 -cmd '.mode csv' -cmd '.import <your_export>.csv flightly' -cmd '.import tzones.csv tzones' -cmd '.output flightradar24.csv' -cmd '.headers on' < query.sql
+sqlite3 -cmd '.mode csv' -cmd '.import <your_export>.csv flightly' -cmd '.import tzones.csv tzones' -cmd '.import airlines.csv' airlines -cmd '.output flightradar24.csv' -cmd '.headers on' < query.sql
 ```
 
 > NOTE: If you dont care about flight durations, you can skip step 3
